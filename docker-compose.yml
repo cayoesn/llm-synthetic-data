@@ -1,12 +1,71 @@
 version: '3.8'
 
 services:
-  synthetic-data:
-    build: .
+  synthetic-data-postgres:
+    image: postgres:15-alpine
+    container_name: synthetic_data_postgres
     environment:
-      - LANGFUSE_PUBLIC_KEY=pk-lf-demo
-      - LANGFUSE_SECRET_KEY=sk-lf-demo
-      - LANGFUSE_HOST=http://localhost:3000
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: syntheticdatapassword
+      POSTGRES_DB: synthetic_data_db
+    ports:
+      - "5438:5432"
+    volumes:
+      - synthetic_data_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - synthetic_data_network
+
+  synthetic-data-langfuse:
+    image: langfuse/langfuse:2
+    container_name: synthetic_data_langfuse
+    depends_on:
+      synthetic-data-postgres:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://postgres:syntheticdatapassword@synthetic-data-postgres:5432/synthetic_data_db
+      - NEXTAUTH_SECRET=syntheticdatasecret
+      - NEXTAUTH_URL=http://localhost:3007
+      - SALT=syntheticdatasalt
+      - ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000
+      - TELEMETRY_ENABLED=false
+      - LANGFUSE_INIT_USER_EMAIL=admin@syntheticdata.com
+      - LANGFUSE_INIT_USER_PASSWORD=adminpassword123
+      - LANGFUSE_INIT_ORG_ID=syntheticdata-org
+      - LANGFUSE_INIT_ORG_NAME=SyntheticData Org
+      - LANGFUSE_INIT_PROJECT_ID=syntheticdata-project
+      - LANGFUSE_INIT_PROJECT_NAME=SyntheticData Project
+      - LANGFUSE_INIT_PROJECT_PUBLIC_KEY=pk-lf-syntheticdata
+      - LANGFUSE_INIT_PROJECT_SECRET_KEY=sk-lf-syntheticdata
+      - LANGFUSE_DISABLE_SIGNUP=true
+    ports:
+      - "3007:3000"
+    networks:
+      - synthetic_data_network
+
+  synthetic-data-app:
+    build: .
+    container_name: synthetic_data_app
+    environment:
+      - ENV=production
+      - LANGFUSE_PUBLIC_KEY=pk-lf-syntheticdata
+      - LANGFUSE_SECRET_KEY=sk-lf-syntheticdata
+      - LANGFUSE_HOST=http://synthetic-data-langfuse:3000
     volumes:
       - ./data:/app/data
       - ./checkpoints:/app/checkpoints
+    depends_on:
+      - synthetic-data-langfuse
+    networks:
+      - synthetic_data_network
+
+networks:
+  synthetic_data_network:
+    driver: bridge
+
+volumes:
+  synthetic_data_postgres_data:
