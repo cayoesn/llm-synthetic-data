@@ -60,3 +60,40 @@ make test
 
 ## 🛡️ Licença & Autor
 Desenvolvido por **Cayo Neves** ([@cayoesn](https://github.com/cayoesn)) como parte do Portfólio de LLM & LLMOps de Alta Performance.
+
+
+
+---
+
+## 🚀 Execução em Container Isolado (100% Autônomo)
+
+Este repositório é **100% independente e autônomo**. Ele não depende de nenhum outro projeto do ecossistema para ser executado, testado ou analisado.
+
+### 🛠️ Componentes Inclusos na Stack Docker Exclusiva:
+- `synthetic_data_app`: Pipeline Evol-Instruct e Treinamento PEFT/QLoRA.
+- `synthetic_data_postgres`: Banco de dados PostgreSQL dedicado (porta 5438).
+- `synthetic_data_langfuse`: Servidor de observabilidade Langfuse self-hosted pré-inicializado.
+
+### 📦 Como Executar:
+
+1. **Subir toda a pilha isolada**:
+   ```bash
+   docker-compose up -d --build
+   ```
+
+2. **Endpoints & Endereços de Acesso**:
+   - **Serviço da Aplicação**: `Job Container (data/checkpoints)` (Documentação interativa OpenAPI em `/docs` se aplicável)
+   - **Painel de Observabilidade (Langfuse)**: `http://localhost:3007`
+   - **Credenciais Automáticas do Langfuse**:
+     - Email: `admin@llmsyntheticdata.com`
+     - Senha: `adminpassword123`
+
+3. **Execução de Testes Automatizados em Container**:
+   ```bash
+   make test
+   ```
+
+4. **Encerrar a pilha**:
+   ```bash
+   docker-compose down -v
+   ```
