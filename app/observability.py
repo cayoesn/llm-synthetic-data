@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 
 class SyntheticObservability:
-    """Observabilidade no Langfuse para Datasets Sintéticos e Treinamento QLoRA."""
+    """Langfuse observability for synthetic datasets and QLoRA fine-tuning runs."""
 
     def __init__(self) -> None:
         self.client = None
@@ -20,9 +20,9 @@ class SyntheticObservability:
                 secret_key=settings.LANGFUSE_SECRET_KEY,
                 host=settings.LANGFUSE_HOST
             )
-            logger.info("Langfuse Client inicializado no Synthetic Data Suite.")
+            logger.info("Langfuse client initialized in the Synthetic Data Suite.")
         except Exception as e:
-            logger.warning(f"Langfuse SDK indisponível: {e}")
+            logger.warning(f"Langfuse SDK unavailable: {e}")
             self.client = None
 
     def trace_dataset_generation(self, num_samples: int, domains: List[str]) -> Optional[str]:
@@ -38,7 +38,7 @@ class SyntheticObservability:
                 return getattr(trace, "id", "demo-dataset-trace")
             return "demo-dataset-trace"
         except Exception as e:
-            logger.error(f"Erro ao registrar trace de dataset: {e}")
+            logger.error(f"Failed to log dataset generation trace: {e}")
             return None
 
     def trace_finetuning_run(self, train_summary: Dict[str, Any]) -> Optional[str]:
@@ -59,7 +59,7 @@ class SyntheticObservability:
                 return getattr(trace, "id", "demo-training-trace")
             return "demo-training-trace"
         except Exception as e:
-            logger.error(f"Erro ao registrar trace de fine-tuning: {e}")
+            logger.error(f"Failed to log fine-tuning trace: {e}")
             return None
 
 

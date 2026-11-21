@@ -5,13 +5,13 @@ from app.generators.evolver import EvolInstructMutator
 
 
 class SyntheticDataPipeline:
-    """Pipeline de Geração de Datasets Sintéticos para Fine-Tuning."""
+    """Synthetic dataset generation pipeline for LLM fine-tuning."""
 
     SEED_PROMPTS = [
-        {"domain": "Atendimento", "instruction": "Como responder a um cliente insatisfeito com atraso de entrega?"},
-        {"domain": "DevOps", "instruction": "Explique como configurar um healthcheck no Docker Compose para FastAPI."},
-        {"domain": "Finanças", "instruction": "Como calcular o reembolso proporcional em cancelamentos de assinatura?"},
-        {"domain": "Segurança", "instruction": "Como higienizar e mascarar CPFs em prompts enviados para LLMs?"}
+        {"domain": "Customer Support", "instruction": "How should we respond to a customer dissatisfied with a delivery delay?"},
+        {"domain": "DevOps", "instruction": "Explain how to configure a Docker Compose healthcheck for FastAPI."},
+        {"domain": "Finance", "instruction": "How do you calculate a prorated refund for subscription cancellations?"},
+        {"domain": "Security", "instruction": "How do you sanitize and mask PII (such as SSNs or tax IDs) in prompts sent to LLMs?"}
     ]
 
     def __init__(self) -> None:
@@ -19,7 +19,7 @@ class SyntheticDataPipeline:
 
     def generate_dataset(self, num_samples_per_seed: int = 2) -> List[Dict[str, Any]]:
         """
-        Gera um dataset sintético instrução-resposta.
+        Generates a synthetic instruction-response dataset.
         """
         dataset = []
         sample_id = 1
@@ -32,8 +32,8 @@ class SyntheticDataPipeline:
                     "domain": seed["domain"],
                     "instruction": mutation["evolved_instruction"],
                     "tactic": mutation["tactic_used"],
-                    "input_context": f"Documentacao de referencia interna para o dominio {seed['domain']}.",
-                    "response": f"Resposta estruturada sintetica gerada para atender a instrucao complexa '{seed['instruction']}' com foco em precisao e conformidade."
+                    "input_context": f"Internal reference documentation for the {seed['domain']} domain.",
+                    "response": f"Structured synthetic response generated to address the complex instruction '{seed['instruction']}' with a focus on accuracy and compliance."
                 }
                 dataset.append(synthetic_entry)
                 sample_id += 1
@@ -41,7 +41,7 @@ class SyntheticDataPipeline:
         return dataset
 
     def export_dataset_json(self, dataset: List[Dict[str, Any]], output_path: str) -> str:
-        """Exporta o dataset sintético em formato JSON ou JSONL para treino."""
+        """Exports the synthetic dataset in JSON or JSONL format for training."""
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(dataset, f, indent=2, ensure_ascii=False)

@@ -4,8 +4,8 @@ from app.generators.curator import DatasetCurator, DatasetSample, MinHashLSH, da
 
 def test_jaccard_similarity():
     sim = dataset_curator.jaccard_similarity(
-        "Como criar um modelo de IA?",
-        "Como podemos criar um modelo de IA?"
+        "How to build an AI model?",
+        "How to quickly build an AI model?"
     )
     assert sim > 0.6
 
@@ -13,10 +13,10 @@ def test_jaccard_similarity():
 def test_deduplicate_and_filter():
     curator = DatasetCurator()
     samples = [
-        DatasetSample(id="1", instruction="O que eh Python?", output="Linguagem de programação."),
-        DatasetSample(id="2", instruction="O que eh Python?", output="Linguagem de programação muito popular."),
-        DatasetSample(id="3", instruction="O que eh Rust?", output="Linguagem de sistemas rápida."),
-        DatasetSample(id="4", instruction="Invalido", output="curto"),
+        DatasetSample(id="1", instruction="What is Python?", output="A programming language."),
+        DatasetSample(id="2", instruction="What is Python?", output="A very popular programming language."),
+        DatasetSample(id="3", instruction="What is Rust?", output="A fast systems programming language."),
+        DatasetSample(id="4", instruction="Invalid", output="short"),
     ]
 
     clean = curator.deduplicate_and_filter(samples, similarity_threshold=0.8, min_output_length=10)
@@ -26,36 +26,36 @@ def test_deduplicate_and_filter():
 
 
 def test_minhash_lsh_subquadratic_deduplication():
-    """Valida a precisão da detecção de duplicatas do MinHash LSH."""
+    """Validates duplicate detection accuracy of MinHash LSH."""
     lsh = MinHashLSH(num_perm=64, num_bands=16)
 
-    doc1 = "Implementacao de algoritmo de ordenacao rapida em Python com complexidade n log n"
-    doc2 = "Implementacao de algoritmo de ordenacao rapida em Python com complexidade n log n para arrays"
-    doc3 = "Arquitetura distribuida de microsservicos com mensageria Kafka e gRPC em Go"
+    doc1 = "Implementation of the quicksort algorithm in Python with n log n time complexity"
+    doc2 = "Implementation of the quicksort algorithm in Python with n log n time complexity for arrays"
+    doc3 = "Distributed microservices architecture using Kafka messaging and gRPC in Go"
 
     sig1 = lsh.compute_signature(doc1)
     sig2 = lsh.compute_signature(doc2)
     sig3 = lsh.compute_signature(doc3)
 
     lsh.insert(sig1, 0)
-    # doc2 deve colidir com doc1 com alta similaridade estimada
+    # doc2 should collide with doc1 with high estimated similarity
     assert lsh.is_duplicate(sig2, threshold=0.7) is True
-    # doc3 é totalmente diferente e não deve ser duplicata
+    # doc3 is completely different and must not be flagged as a duplicate
     assert lsh.is_duplicate(sig3, threshold=0.7) is False
 
 
 def test_anti_hallucination_loop_filter():
-    """Valida que textos com repetição degenerada são filtrados."""
+    """Validates that texts with degenerate repetition are filtered out."""
     curator = DatasetCurator()
-    repetitive_output = "Isto eh excelente. Isto eh excelente. Isto eh excelente. Isto eh excelente."
+    repetitive_output = "This is great. This is great. This is great. This is great."
     assert curator.detect_repetitive_loop(repetitive_output) is True
 
-    normal_output = "Isto eh excelente para producao porque reduz o custo computacional e melhora a precisao."
+    normal_output = "This is great for production because it reduces compute cost and improves accuracy."
     assert curator.detect_repetitive_loop(normal_output) is False
 
     samples = [
-        DatasetSample(id="1", instruction="Instrucao normal", output=repetitive_output),
-        DatasetSample(id="2", instruction="Instrucao normal 2", output=normal_output),
+        DatasetSample(id="1", instruction="Normal instruction", output=repetitive_output),
+        DatasetSample(id="2", instruction="Normal instruction 2", output=normal_output),
     ]
     clean = curator.deduplicate_and_filter(samples, similarity_threshold=0.8, min_output_length=10)
     assert len(clean) == 1

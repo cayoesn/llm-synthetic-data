@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Configurações Globais da Gerador de Dados Sintéticos e Fine-Tuning."""
+    """Global settings for the Synthetic Data Generation and Fine-Tuning Suite."""
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -12,11 +12,11 @@ class Settings(BaseSettings):
     APP_NAME: str = "LLM Synthetic Data & Fine-Tuning Suite"
     ENV: str = "development"
 
-    # Parâmetros de Evolução de Prompts (Evol-Instruct)
+    # Prompt Evolution Parameters (Evol-Instruct)
     MUTATION_DEPTH: int = 3
     TARGET_DATASET_SIZE: int = 50
 
-    # Configurações de Fine-Tuning QLoRA
+    # QLoRA Fine-Tuning Settings
     LORA_R: int = 16
     LORA_ALPHA: int = 32
     LORA_DROPOUT: float = 0.05

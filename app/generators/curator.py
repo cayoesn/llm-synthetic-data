@@ -12,20 +12,20 @@ class DatasetSample(BaseModel):
 
 
 class MinHashLSH:
-    """Locality-Sensitive Hashing (LSH) com MinHash para desduplicação sub-quadrática O(N * K)."""
+    """Locality-Sensitive Hashing (LSH) with MinHash for sub-quadratic O(N * K) deduplication."""
 
     def __init__(self, num_perm: int = 64, num_bands: int = 16, seed: int = 42):
         self.num_perm = num_perm
         self.num_bands = num_bands
         self.rows_per_band = num_perm // num_bands
         self.prime = 2147483647  # 2^31 - 1
-        
-        # Gera coeficientes determinísticos para as permutações universais
+
+        # Generate deterministic coefficients for universal hash permutations
         import random
         rng = random.Random(seed)
         self.a = [rng.randint(1, self.prime - 1) for _ in range(num_perm)]
         self.b = [rng.randint(0, self.prime - 1) for _ in range(num_perm)]
-        
+
         # Buckets: (band_idx, band_hash) -> list[int]
         self.buckets: Dict[Tuple[int, int], List[int]] = collections.defaultdict(list)
         self.signatures: List[List[int]] = []
@@ -52,7 +52,7 @@ class MinHashLSH:
         return sig
 
     def is_duplicate(self, sig: List[int], threshold: float = 0.8) -> bool:
-        """Verifica se a assinatura já colide em algum bucket com similaridade >= threshold."""
+        """Checks whether the signature collides in any bucket with estimated similarity >= threshold."""
         candidate_indices: Set[int] = set()
 
         for band_idx in range(self.num_bands):
@@ -64,7 +64,7 @@ class MinHashLSH:
             for cand_idx in self.buckets.get((band_idx, band_hash), []):
                 candidate_indices.add(cand_idx)
 
-        # Para cada candidato, calcula a similaridade MinHash estimada
+        # Compute estimated MinHash similarity for each candidate
         for cand_idx in candidate_indices:
             cand_sig = self.signatures[cand_idx]
             match_count = sum(1 for x, y in zip(sig, cand_sig) if x == y)
@@ -86,9 +86,9 @@ class MinHashLSH:
 
 class DatasetCurator:
     """Enterprise Dataset Curator & Quality Filtering Engine.
-    
-    Aplica desduplicação sub-quadrática via MinHash LSH O(N * K), detecção de
-    repetição degenerada (loops de alucinação de LLMs) e filtragem de qualidade.
+
+    Applies sub-quadratic deduplication via MinHash LSH O(N * K), degenerate
+    repetition detection (LLM hallucination loops), and quality filtering.
     """
 
     @staticmethod
@@ -101,12 +101,12 @@ class DatasetCurator:
 
     @staticmethod
     def detect_repetitive_loop(text: str, max_consecutive_repeats: int = 3) -> bool:
-        """Detecta loops de repetição de n-gramas característicos de colapso de modelo."""
+        """Detects consecutive n-gram repetition loops characteristic of model collapse."""
         words = re.findall(r"\b\w+\b", text.lower())
         if len(words) < 6:
             return False
 
-        # Verifica repetição consecutiva de blocos de palavras de tamanho L (1 a 8 palavras)
+        # Check for consecutive repetitions of word chunks of length L (1 to 8 words)
         for L in range(1, 9):
             consecutive = 1
             for i in range(L, len(words) - L + 1, L):
@@ -132,15 +132,15 @@ class DatasetCurator:
         lsh = MinHashLSH(num_perm=64, num_bands=16) if use_lsh else None
 
         for sample in samples:
-            # 1. Filtro de comprimento mínimo
+            # 1. Minimum output length filter
             if len(sample.output.strip()) < min_output_length:
                 continue
 
-            # 2. Filtro anti-alucinação / loop degenerado
+            # 2. Anti-hallucination / degenerate loop filter
             if self.detect_repetitive_loop(sample.output):
                 continue
 
-            # 3. Verificação de Duplicidade
+            # 3. Duplicate detection
             if use_lsh and lsh is not None:
                 sig = lsh.compute_signature(sample.instruction)
                 if lsh.is_duplicate(sig, threshold=similarity_threshold):
@@ -160,5 +160,5 @@ class DatasetCurator:
         return clean_samples
 
 
-# Instância Singleton
+# Singleton instance
 dataset_curator = DatasetCurator()

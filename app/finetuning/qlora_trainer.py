@@ -4,7 +4,7 @@ from app.config import settings
 
 
 class QLoRATrainerPipeline:
-    """Pipeline de Treinamento PEFT / QLoRA (Quantized Low-Rank Adaptation)."""
+    """PEFT / QLoRA (Quantized Low-Rank Adaptation) fine-tuning pipeline."""
 
     def __init__(self, r: int = settings.LORA_R, alpha: int = settings.LORA_ALPHA) -> None:
         self.r = r
@@ -15,7 +15,7 @@ class QLoRATrainerPipeline:
 
     def configure_lora_config(self) -> Dict[str, Any]:
         """
-        Retorna a configuração dos adaptadores LoRA.
+        Returns the LoRA adapter configuration.
         """
         return {
             "r": self.r,
@@ -28,7 +28,7 @@ class QLoRATrainerPipeline:
 
     def train(self, dataset: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        Executa a rotina de fine-tuning QLoRA sobre o dataset sintético.
+        Executes the QLoRA fine-tuning routine on the synthetic dataset.
         """
         start_time = time.time()
         num_samples = len(dataset)

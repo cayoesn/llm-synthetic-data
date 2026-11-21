@@ -1,36 +1,36 @@
 # 🧬 LLM Synthetic Data & Fine-Tuning Pipeline (Enterprise Edition)
 
-Pipeline Industrial de Geração Sintética de Dados, Curadoria de Alta Qualidade e Fine-Tuning baseado em **Evol-Instruct**, **MinHash LSH Sub-Quadrático** e **QLoRA Adaptativo**.
+Industrial-grade synthetic data generation, high-quality curation, and fine-tuning pipeline powered by **Evol-Instruct**, **Sub-Quadratic MinHash LSH**, and **Adaptive QLoRA**.
 
 ---
 
-## 🌟 Arquitetura & Recursos Big-Tech
+## 🌟 Architecture & Enterprise Capabilities
 
-- **Desduplicação Sub-Quadrática MinHash LSH**:
-  - Locality-Sensitive Hashing particionado em $b$ bandas de $r$ linhas ($K = b \cdot r = 64$).
-  - Probabilidade de colisão modelada pela curva S:
-    $$P(\text{colisão}) = 1 - (1 - s^r)^b$$
-  - Reduz a complexidade de deduplicação de um ingênuo $\mathcal{O}(N^2)$ para $\mathcal{O}(N \cdot K)$.
-- **Filtro Anti-Alucinação & Loop Degenerado**:
-  - Detecção precoce de colapso de amostragem de LLMs via repetição consecutiva de blocos de $n$-gramas ($1 \le L \le 8$).
+- **Sub-Quadratic MinHash LSH Deduplication**:
+  - Locality-Sensitive Hashing partitioned into $b$ bands of $r$ rows ($K = b \cdot r = 64$).
+  - Collision probability modeled by the S-curve:
+    $$P(\text{collision}) = 1 - (1 - s^r)^b$$
+  - Reduces deduplication complexity from a naive $\mathcal{O}(N^2)$ to $\mathcal{O}(N \cdot K)$.
+- **Anti-Hallucination & Degenerate Loop Filter**:
+  - Early detection of LLM sampling collapse via consecutive repetition of $n$-gram chunks ($1 \le L \le 8$).
 - **Evol-Instruct Pattern**:
-  - Mutações sintéticas in-depth e in-breadth: adição de restrições estritas, concretização em cenários reais, exigência de Chain-of-Thought e derivação lateral de tópicos.
-- **Integração QLoRA Fine-Tuning**:
-  - Preparação e sanitização automatizada de datasets instrucionais para fine-tuning eficiente com quantização de 4 bits.
+  - In-depth and in-breadth synthetic mutations: adding strict constraints, concretizing into real-world scenarios, requiring Chain-of-Thought reasoning, and deriving related complex topics.
+- **QLoRA Fine-Tuning Integration**:
+  - Automated preparation and sanitization of instruction datasets for memory-efficient 4-bit quantized fine-tuning.
 
 ---
 
-## 📊 Tabela de Complexidade Assintótica
+## 📊 Asymptotic Complexity Comparison
 
-| Componente | Algoritmo Tradicional | Abordagem Enterprise Implementada | Redução de Complexidade |
+| Component | Traditional Algorithm | Implemented Enterprise Approach | Complexity Reduction |
 | :--- | :--- | :--- | :--- |
-| **Deduplicação** | Comparação Pareada Jaccard $\mathcal{O}(N^2)$ | MinHash LSH com Banding | $\mathcal{O}(N^2) \to \mathcal{O}(N \cdot K)$ |
-| **Loop Check** | Análise Exaustiva de Substrings $\mathcal{O}(|T|^2)$ | Sliding Window Chunk Matcher | $\mathcal{O}(|T|)$ |
-| **Curadoria de Dados** | Pós-processamento Manual | Pipeline Streaming Concorrente | Filtragem instantânea inline |
+| **Deduplication** | Pairwise Jaccard Comparison $\mathcal{O}(N^2)$ | Banded MinHash LSH | $\mathcal{O}(N^2) \to \mathcal{O}(N \cdot K)$ |
+| **Loop Detection** | Exhaustive Substring Analysis $\mathcal{O}(\|T\|^2)$ | Sliding Window Chunk Matcher | $\mathcal{O}(\|T\|)$ |
+| **Data Curation** | Manual Post-Processing | Concurrent Streaming Pipeline | Inline real-time filtering |
 
 ---
 
-## 🚀 Como Executar no Docker
+## 🚀 Running with Docker
 
 ```bash
 docker compose up -d --build
@@ -38,7 +38,7 @@ docker compose up -d --build
 
 ---
 
-## 🧪 Testes Automatizados (100% Hermético)
+## 🧪 Automated Tests (100% Hermetic)
 
 ```bash
 docker run --rm -v $(pwd):/workspace -w /workspace -e PYTHONPATH=/workspace portfolio-spec-engine:test pytest tests -v --cov=app --cov-report=term-missing
